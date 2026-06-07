@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+pydantic
+celery
+python-multipart
+pandas

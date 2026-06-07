@@ -1,0 +1,27 @@
+/* Animación infinita para el fondo */
+@keyframes fluidBackground {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  /* Gradiente con contraste: Azul profundo, Índigo, y un toque de Esmeralda oscuro */
+  background: linear-gradient(-45deg, #0a1929, #1a237e, #004d40, #0a1929);
+  background-size: 400% 400%;
+  animation: fluidBackground 15s ease infinite;
+  background-attachment: fixed;
+  color: white;
+}
+
+/* Animación de flotación para las tarjetas al pasar el mouse */
+.hover-float {
+  transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+.hover-float:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 229, 255, 0.2) !important;
+}

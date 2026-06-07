@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: mlops-broker-ms
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  api-gateway:
+    build: ./backend/api_gateway
+    container_name: mlops-api-ms
+    ports:
+      - "8000:8000"
+    depends_on:
+      - rabbitmq
+    volumes:
+      - shared_data:/app/data  # <-- FastAPI guarda aquí
+
+  ml-worker:
+    build: ./backend/ml_worker
+    container_name: mlops-worker-ms
+    depends_on:
+      - rabbitmq
+    volumes:
+      - shared_data:/app/data  # <-- Celery lee de aquí
+
+  frontend:
+    build: ./frontend
+    container_name: mlops-frontend-ms
+    ports:
+      - "3000:80"
+    depends_on:
+      - api-gateway
+
+# Declaramos el volumen
+volumes:
+  shared_data:
+  
