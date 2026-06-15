@@ -1,60 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Paper, Alert, Tabs, Tab } from '@mui/material';
+import { Box, Typography, Paper, Alert, TextField, Slider, FormControlLabel, Switch, Divider, Grid } from '@mui/material';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 
-// Importaciones comentadas para evitar warnings de consola
-// import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-// import LinkIcon from '@mui/icons-material/Link';
-// import { Button, CircularProgress, TextField } from '@mui/material';
-
-function CustomTabPanel({ children, value, index }) {
-  return <div hidden={value !== index}>{value === index && <Box sx={{ p: 3 }}>{children}</Box>}</div>;
-}
-
 export default function DataHub({ setDatasetConfig, datasetConfig }) {
-  // Iniciamos directamente en el index 0 (que ahora es el sintético)
-  const [tabValue, setTabValue] = useState(0);
+  // Opciones globales de preprocesamiento
+  const [testSize, setTestSize] = useState(20);
+  const [balance, setBalance] = useState(false);
 
-  // Aseguramos que el estado global inicie y se mantenga en 'sintetico'
+  // Parámetros sintéticos extendidos
+  const [synthParams, setSynthParams] = useState({ n_samples: 1000, n_features: 10, n_classes: 2 });
+
   useEffect(() => {
-    setDatasetConfig({ tipo: 'sintetico' });
-  }, [setDatasetConfig]);
+    // Actualiza la configuración global cada vez que cambien los valores
+    setDatasetConfig((prev) => ({
+      ...prev,
+      test_size: testSize / 100,
+      balance: balance
+    }));
+  }, [testSize, balance, setDatasetConfig]);
 
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
+  useEffect(() => {
+    // Al iniciar, forzamos tipo sintético
+    setDatasetConfig((prev) => ({
+      ...prev,
+      tipo: 'sintetico',
+      params: synthParams
+    }));
+  }, []); // Solo on mount, los cambios posteriores se manejan en handleTabChange y handles específicos
+
+  const handleSynthChange = (field, value) => {
+    const newParams = { ...synthParams, [field]: Number(value) };
+    setSynthParams(newParams);
+    setDatasetConfig((prev) => ({ ...prev, tipo: 'sintetico', params: newParams }));
   };
 
-  /* =====================================================================
-     LÓGICA COMENTADA PARA FUTURA IMPLEMENTACIÓN (ARCHIVOS Y URL)
-     =====================================================================
-  const [isUploading, setIsUploading] = useState(false);
-  const [urlInput, setUrlInput] = useState('');
 
-  const handleFileUpload = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    setIsUploading(true);
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      const response = await fetch('http://localhost:8000/api/upload', { method: 'POST', body: formData });
-      const data = await response.json();
-      if (data.status === 'success') {
-        setDatasetConfig({ tipo: 'archivo', archivo: data.archivo });
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const handleUrlSubmit = () => {
-    if(urlInput) setDatasetConfig({ tipo: 'url', url: urlInput });
-  };
-  ===================================================================== */
 
   return (
     <Box sx={{ mt: 4, mb: 6 }}>
@@ -62,54 +42,61 @@ export default function DataHub({ setDatasetConfig, datasetConfig }) {
         1. Ingesta de Datos (Data Hub)
       </Typography>
       <Paper elevation={3} sx={{ bgcolor: 'rgba(0,0,0,0.2)', borderRadius: 2 }}>
-        <Tabs value={tabValue} onChange={handleTabChange} textColor="primary" indicatorColor="primary">
-          {/* Pestañas comentadas para ocultarlas de la interfaz gráfica */}
-          {/* <Tab icon={<CloudUploadIcon />} label="Archivo Local (CSV/JSON)" /> */}
-          {/* <Tab icon={<LinkIcon />} label="URL Externa" /> */}
-          <Tab icon={<AutoFixHighIcon />} label="Dataset Sintético" />
-        </Tabs>
-
-        {/* ================================================================
-            PANELES COMENTADOS
-            ================================================================ */}
-        {/* PESTAÑA 0 ORIGINAL: ARCHIVO */}
-        {/* <CustomTabPanel value={tabValue} index={0}>
-          <Box sx={{ textAlign: 'center', p: 2, border: '2px dashed rgba(0,229,255,0.3)', borderRadius: 2 }}>
-            <input accept=".csv,.json" style={{ display: 'none' }} id="file-upload" type="file" onChange={handleFileUpload} />
-            <label htmlFor="file-upload">
-              <Button variant="outlined" component="span" startIcon={isUploading ? <CircularProgress size={20} /> : <CloudUploadIcon />} disabled={isUploading}>
-                {isUploading ? 'Subiendo al volumen...' : 'Seleccionar Archivo Local'}
-              </Button>
-            </label>
-            {datasetConfig.tipo === 'archivo' && (
-              <Alert severity="success" sx={{ mt: 2 }}>Archivo <strong>{datasetConfig.archivo}</strong> listo para el clúster.</Alert>
-            )}
+        <Box sx={{ p: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <AutoFixHighIcon sx={{ mr: 1, color: 'primary.main' }} />
+            <Typography variant="h6">Dataset Sintético</Typography>
           </Box>
-        </CustomTabPanel>
-        */}
-
-        {/* PESTAÑA 1 ORIGINAL: URL */}
-        {/*
-        <CustomTabPanel value={tabValue} index={1}>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField fullWidth label="URL del Dataset (CSV/JSON)" variant="outlined" size="small" value={urlInput} onChange={(e) => setUrlInput(e.target.value)} />
-            <Button variant="contained" onClick={handleUrlSubmit}>Configurar</Button>
-          </Box>
-          {datasetConfig.tipo === 'url' && (
-            <Alert severity="success" sx={{ mt: 2 }}>El clúster descargará los datos desde: <strong>{datasetConfig.url}</strong></Alert>
-          )}
-        </CustomTabPanel>
-        */}
-
-        {/* ================================================================
-            PANEL ACTIVO
-            ================================================================ */}
-        {/* PESTAÑA ÚNICA ACTIVA: SINTÉTICO (Ahora responde al index 0) */}
-        <CustomTabPanel value={tabValue} index={0}>
-          <Alert severity="info" sx={{ '& .MuiAlert-message': { width: '100%' } }}>
-            <strong>Modo de demostración activo:</strong> Se usarán datos generados aleatoriamente mediante Scikit-Learn (1000 muestras). Ideal para pruebas de estrés y concurrencia en los nodos del clúster.
+          <Alert severity="info" sx={{ mb: 3 }}>
+            <strong>Generador Dinámico:</strong> Crea un dataset aleatorio sobre la marcha configurando sus propiedades matemáticas.
           </Alert>
-        </CustomTabPanel>
+          
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={4}>
+              <TextField 
+                fullWidth label="Número de Muestras (Filas)" type="number" size="small"
+                value={synthParams.n_samples} onChange={(e) => handleSynthChange('n_samples', e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField 
+                fullWidth label="Número de Características (Columnas)" type="number" size="small"
+                value={synthParams.n_features} onChange={(e) => handleSynthChange('n_features', e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField 
+                fullWidth label="Cantidad de Clases (Etiquetas)" type="number" size="small"
+                value={synthParams.n_classes} onChange={(e) => handleSynthChange('n_classes', e.target.value)}
+              />
+            </Grid>
+          </Grid>
+        </Box>
+
+        <Divider sx={{ my: 1, borderColor: 'rgba(255,255,255,0.1)' }} />
+        
+        {/* OPCIONES DE PREPROCESAMIENTO GLOBALES */}
+        <Box sx={{ p: 3 }}>
+          <Typography variant="subtitle1" gutterBottom color="primary">Opciones de Preprocesamiento Globales</Typography>
+          <Grid container spacing={4} alignItems="center">
+            <Grid item xs={12} md={6}>
+              <Typography gutterBottom>Porcentaje para Pruebas (Test Size: {testSize}%)</Typography>
+              <Slider 
+                value={testSize} 
+                onChange={(e, val) => setTestSize(val)} 
+                aria-label="Test Size" 
+                valueLabelDisplay="auto" 
+                step={5} marks min={5} max={50} 
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <FormControlLabel 
+                control={<Switch checked={balance} onChange={(e) => setBalance(e.target.checked)} color="secondary" />} 
+                label="Balancear Dataset (Oversampling automático)" 
+              />
+            </Grid>
+          </Grid>
+        </Box>
 
       </Paper>
     </Box>
