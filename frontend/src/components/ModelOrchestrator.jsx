@@ -42,7 +42,7 @@ export default function ModelOrchestrator({ onDeploySuccess, datasetConfig }) {
     };
 
     try {
-      const response = await fetch('http://localhost:8000/api/orchestrate', {
+      const response = await fetch('http://20.83.188.246:8000/api/orchestrate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
