@@ -20,7 +20,7 @@ function App() {
     tickets.forEach((ticket) => {
       const intervalId = setInterval(async () => {
         try {
-          const res = await fetch(`http://localhost:8000/api/status/${ticket.task_id}`);
+          const res = await fetch(`http://20.83.188.246:8000/api/status/${ticket.task_id}`);
           const data = await res.json();
           if (data.status === 'completed') {
             clearInterval(intervalId);
